@@ -4,17 +4,12 @@ import (
 	"log"
 	"time"
 
+	"example.com/server/models"
 	"github.com/gofiber/fiber/v2"
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-type User struct {
-	Id          int    `json:"id"`
-	Name        string `json:"name"`
-	internal_id string // Small case for unexported field
-}
 
 type Login struct {
 	Username string `json:"username"`
@@ -32,10 +27,23 @@ func NewAuthMiddleware(secret string) fiber.Handler {
 
 func main() {
 
-	// Create a slice with users
-	users := []User{
-		User{Id: 1, Name: "Elon Musk", internal_id: "123"},
-		User{Id: 2, Name: "Sam Altman", internal_id: "456"},
+	// Connect to database
+	err := connectDb()
+	if err != nil {
+		panic(err)
+	}
+
+	// Perform auto migration to create table if not present
+	db.AutoMigrate(&models.User{})
+
+	// Create a slice with few users
+	users := []models.User{
+		models.User{Id: 1, Name: "Elon Musk"},
+		models.User{Id: 2, Name: "Sam Altman"},
+	}
+	// Insert users into database if not already exists
+	for _, user := range users {
+		db.FirstOrCreate(&user, user)
 	}
 
 	app := fiber.New() // Notice similarity with express.js => const app = express()
@@ -49,18 +57,24 @@ func main() {
 
 	// Get request returning JSON
 	app.Get("/users", func(c *fiber.Ctx) error {
-		return c.JSON(users)
+		var allUsers []models.User
+		rows := db.Table("users").Select("id", "name")
+		err := rows.Scan(&allUsers).Error
+		if err != nil {
+			return c.Status(500).SendString("Error fetching users from database")
+		}
+		return c.JSON(allUsers)
 	})
 
 	// Post requesting accepting Json data
 	app.Post("/users", jwtMiddleware, func(c *fiber.Ctx) error {
-		user := new(User)
-		err := c.BodyParser(user)
+		userDetails := new(models.User)
+		err := c.BodyParser(userDetails)
 		if err != nil {
 			return c.Status(400).SendString("Invalid JSON")
 		}
-		users = append(users, *user)
-		return c.JSON(users)
+		db.Create(&userDetails)
+		return c.JSON(userDetails)
 	})
 
 	// Login route
