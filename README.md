@@ -26,7 +26,7 @@ SSH into container - Run `docker exec -it <container-id> sh`
 
 Access mysql shell - Run `mysql -u root -p` (Provide root password if prompted)
 
-Create Database Run `CREATE DATABASE gofibersampledb;`
+Create Database - Run `CREATE DATABASE gofibersampledb;`
 
 
 2) Update Database URI in database.go accordingly
