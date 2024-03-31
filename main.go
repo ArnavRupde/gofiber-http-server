@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	jwtware "github.com/gofiber/contrib/jwt"
+	"github.com/gofiber/contrib/websocket"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -54,6 +55,23 @@ func main() {
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello World")
 	})
+
+	app.Get("/ws", websocket.New(func(c *websocket.Conn) {
+		for {
+			// Read message from websocket connection
+			mtype, msg, err := c.ReadMessage()
+			if err != nil {
+				break
+			}
+			log.Printf("Message received: %s", msg)
+			// Write message back to websocket connection
+			err = c.WriteMessage(mtype, msg)
+			if err != nil {
+				break
+			}
+		}
+		log.Printf("Error: %v", err)
+	}))
 
 	// Get request returning JSON
 	app.Get("/users", func(c *fiber.Ctx) error {
