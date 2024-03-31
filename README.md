@@ -58,3 +58,6 @@ Run `./gofiber-server`
 4) POST Users API with Authorization token - Works fine
 
 <img width="1280" alt="Screenshot 2024-03-18 at 8 16 14 PM" src="https://github.com/ArnavRupde/gofiber-http-server/assets/34592221/d6749de6-1722-4180-9e98-1e7da6177947">
+
+5) Connect over Websocket and Send message
+<img width="1720" alt="Screenshot 2024-03-31 at 9 03 18 PM" src="https://github.com/ArnavRupde/gofiber-http-server/assets/34592221/4f864487-741c-4000-8647-84a50ad85b6a">
