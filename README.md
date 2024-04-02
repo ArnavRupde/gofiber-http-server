@@ -51,13 +51,17 @@ Run `./gofiber-server`
    
 <img width="1280" alt="Screenshot 2024-03-18 at 8 15 37 PM" src="https://github.com/ArnavRupde/gofiber-http-server/assets/34592221/d4af4820-80cc-42a2-bcf0-52ae6929477d">
 
-3) POST Login API to get jwt
-   
-<img width="1280" alt="Screenshot 2024-03-18 at 8 15 49 PM" src="https://github.com/ArnavRupde/gofiber-http-server/assets/34592221/6853a553-2103-4c29-a88b-26ee3d491b41">
+3) POST Signup API to create user
 
-4) POST Users API with Authorization token - Works fine
+<img width="1277" alt="Screenshot 2024-04-03 at 1 00 04 AM" src="https://github.com/ArnavRupde/gofiber-http-server/assets/34592221/11977678-ad36-40e1-a3b8-603bc3d4e851">
+
+4) POST Login API to get jwt
+
+<img width="1277" alt="Screenshot 2024-04-03 at 1 00 25 AM" src="https://github.com/ArnavRupde/gofiber-http-server/assets/34592221/e4e7a225-11d6-4c5f-b863-6c2415980431">
+
+5) POST Users API with Authorization token - Works fine
 
 <img width="1280" alt="Screenshot 2024-03-18 at 8 16 14 PM" src="https://github.com/ArnavRupde/gofiber-http-server/assets/34592221/d6749de6-1722-4180-9e98-1e7da6177947">
 
-5) Connect over Websocket and Send message
+6) Connect over Websocket and Send message
 <img width="1720" alt="Screenshot 2024-03-31 at 9 03 18 PM" src="https://github.com/ArnavRupde/gofiber-http-server/assets/34592221/4f864487-741c-4000-8647-84a50ad85b6a">
