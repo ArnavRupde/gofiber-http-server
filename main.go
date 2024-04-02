@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"example.com/server/auth"
 	"example.com/server/models"
 	"github.com/gofiber/fiber/v2"
 
@@ -95,6 +96,36 @@ func main() {
 		return c.JSON(userDetails)
 	})
 
+	// Signup route
+	app.Post("/signup", func(c *fiber.Ctx) error {
+		signupCredentials := new(Login)
+		err := c.BodyParser(signupCredentials)
+		if err != nil && signupCredentials.Username != "" && signupCredentials.Password != "" {
+			return c.Status(400).SendString("Invalid input JSON")
+		}
+		// Check if user already exists
+		var users []models.User
+		db.Where("username = ?", signupCredentials.Username).Find(&users)
+		if len(users) > 0 {
+			return c.Status(400).SendString("User already exists")
+		}
+		// Create user
+		hashedPassword, err := auth.HashPassword(signupCredentials.Password)
+		if err != nil {
+			return c.Status(500).SendString("Error creating user")
+		}
+		newUser := models.User{
+			Name:           "New User",
+			Username:       signupCredentials.Username,
+			HashedPassword: hashedPassword,
+		}
+		result := db.Create(&newUser)
+		if result.Error != nil {
+			return c.Status(500).SendString("Error creating user")
+		}
+		return c.JSON(newUser)
+	})
+
 	// Login route
 	app.Post("/login", func(c *fiber.Ctx) error {
 		loginCredentials := new(Login)
@@ -103,25 +134,34 @@ func main() {
 			return c.Status(400).SendString("Invalid input JSON")
 		}
 
-		username := "admin"
-		password := "admin"
-		if loginCredentials.Username == username && loginCredentials.Password == password {
-			// Set up content for JWT
-			claims := jwt.MapClaims{
-				"username": username,
-				"exp":      time.Now().Add(time.Hour * 24).Unix(),
-			}
-			// Create token
-			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-			//Encode token
-			encodedToken, err := token.SignedString([]byte(SECRET_KEY))
-			if err != nil {
-				return c.SendStatus(500)
-			}
-			return c.JSON(fiber.Map{"token": encodedToken})
-		} else {
-			return c.SendStatus(401)
+		username := loginCredentials.Username
+		password := loginCredentials.Password
+		// Verify that user exists
+		var users []models.User
+		db.Where("username = ?", username).Find(&users)
+		if len(users) == 0 {
+			return c.Status(400).SendString("User does not exist")
 		}
+		// Verify password
+		hashedPassword := users[0].HashedPassword
+		err = auth.ComaparePassword(hashedPassword, password)
+		if err != nil {
+			return c.Status(401).SendString("Incorrect password")
+		}
+
+		// Set up content for JWT
+		claims := jwt.MapClaims{
+			"username": username,
+			"exp":      time.Now().Add(time.Hour * 24).Unix(),
+		}
+		// Create token
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		//Encode token
+		encodedToken, err := token.SignedString([]byte(SECRET_KEY))
+		if err != nil {
+			return c.SendStatus(500)
+		}
+		return c.JSON(fiber.Map{"token": encodedToken})
 	})
 
 	log.Fatal(app.Listen(":3001"))

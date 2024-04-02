@@ -7,6 +7,7 @@ require (
 	github.com/gofiber/contrib/websocket v1.3.0
 	github.com/gofiber/fiber/v2 v2.52.4
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	golang.org/x/crypto v0.21.0
 	gorm.io/driver/mysql v1.5.5
 	gorm.io/gorm v1.25.8
 )
