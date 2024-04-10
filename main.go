@@ -7,6 +7,7 @@ import (
 	"example.com/server/auth"
 	"example.com/server/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/shopspring/decimal"
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/contrib/websocket"
@@ -37,6 +38,7 @@ func main() {
 
 	// Perform auto migration to create table if not present
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Wallet{})
 
 	// Create a slice with few users
 	users := []models.User{
@@ -47,6 +49,14 @@ func main() {
 	for _, user := range users {
 		db.FirstOrCreate(&user, user)
 	}
+
+	// Create a wallet for user with id 1
+	db.Create(
+		&models.Wallet{
+			UserId:  1,
+			Balance: decimal.NewFromFloat(1000.00),
+		},
+	)
 
 	app := fiber.New() // Notice similarity with express.js => const app = express()
 
