@@ -6,6 +6,7 @@ import (
 
 	"example.com/server/auth"
 	"example.com/server/models"
+	"example.com/server/services"
 	"github.com/gofiber/fiber/v2"
 	"github.com/shopspring/decimal"
 
@@ -57,6 +58,14 @@ func main() {
 			Balance: decimal.NewFromFloat(1000.00),
 		},
 	)
+	db.Create(
+		&models.Wallet{
+			UserId:  2,
+			Balance: decimal.NewFromFloat(1000.00),
+		},
+	)
+
+	paymentService := services.NewPaymentService(db)
 
 	app := fiber.New() // Notice similarity with express.js => const app = express()
 
@@ -172,6 +181,24 @@ func main() {
 			return c.SendStatus(500)
 		}
 		return c.JSON(fiber.Map{"token": encodedToken})
+	})
+
+	app.Post("/transfer_funds", func(c *fiber.Ctx) error {
+		transferDetails := new(services.TransferDetails)
+		err := c.BodyParser(transferDetails)
+		if err != nil || transferDetails.FromUserId <= 0 || transferDetails.ToUserId <= 0 || !transferDetails.Amount.IsPositive() {
+			return c.Status(400).SendString("Invalid input JSON")
+		}
+		err = paymentService.TransferFunds(
+			c.Context(),
+			transferDetails.FromUserId,
+			transferDetails.ToUserId,
+			transferDetails.Amount,
+		)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		return c.SendString("Funds transferred successfully")
 	})
 
 	log.Fatal(app.Listen(":3001"))
